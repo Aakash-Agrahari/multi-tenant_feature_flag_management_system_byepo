@@ -4,6 +4,7 @@ import { sendSuccess } from '../utils/apiResponse.js';
 import Organization from '../models/Organization.js';
 import User from '../models/User.js';
 import FeatureFlag from '../models/FeatureFlag.js';
+import { ROLES } from '../config/roles.js';
 
 /**
  * POST /api/organizations  (Super Admin only)
@@ -85,4 +86,32 @@ export const getOrganizationStats = asyncHandler(async (req, res) => {
       scheduledFlags,
     },
   });
+});
+
+export const createOrgAdmin = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
+
+  const org = await Organization.findById(req.params.id);
+  if (!org) throw new ApiError(404, 'Organization not found');
+
+  const existing = await User.findOne({ email });
+  if (existing) throw new ApiError(409, 'An account with this email already exists');
+
+  const admin = await User.create({
+    name,
+    email,
+    password,
+    role: ROLES.ORG_ADMIN,
+    organization: org._id,
+  });
+
+  sendSuccess(res, 201, 'Organization admin created', { admin: admin.toSafeObject() });
+});
+
+export const listOrgAdmins = asyncHandler(async (req, res) => {
+  const org = await Organization.findById(req.params.id);
+  if (!org) throw new ApiError(404, 'Organization not found');
+
+  const admins = await User.find({ organization: org._id, role: ROLES.ORG_ADMIN }).sort({ createdAt: -1 });
+  sendSuccess(res, 200, 'Organization admins fetched', { admins });
 });
