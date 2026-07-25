@@ -5,15 +5,20 @@ import Organization from '../models/Organization.js';
 import User from '../models/User.js';
 import FeatureFlag from '../models/FeatureFlag.js';
 import { ROLES } from '../config/roles.js';
-
 /**
  * POST /api/organizations  (Super Admin only)
+ * Creates the Organization AND its first Org Admin together in one step,
+ * so the Super Admin always walks away with working login credentials
+ * to hand off — no separate "add admin" step required.
  */
 export const createOrganization = asyncHandler(async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, adminName, adminEmail, adminPassword } = req.body;
 
-  const existing = await Organization.findOne({ name: name.trim() });
-  if (existing) throw new ApiError(409, 'An organization with this name already exists');
+  const existingOrg = await Organization.findOne({ name: name.trim() });
+  if (existingOrg) throw new ApiError(409, 'An organization with this name already exists');
+
+  const existingUser = await User.findOne({ email: adminEmail });
+  if (existingUser) throw new ApiError(409, 'An account with this admin email already exists');
 
   const org = await Organization.create({
     name: name.trim(),
@@ -21,7 +26,18 @@ export const createOrganization = asyncHandler(async (req, res) => {
     createdBy: req.user._id,
   });
 
-  sendSuccess(res, 201, 'Organization created', { organization: org });
+  const admin = await User.create({
+    name: adminName,
+    email: adminEmail,
+    password: adminPassword,
+    role: ROLES.ORG_ADMIN,
+    organization: org._id,
+  });
+
+  sendSuccess(res, 201, 'Organization and admin account created', {
+    organization: org,
+    admin: admin.toSafeObject(),
+  });
 });
 
 /**
