@@ -1,0 +1,52 @@
+
+# dependencies
+node_modules/
+**/node_modules/
+
+# environment variables
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# build output
+dist/
+build/
+**/dist/
+**/build/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# lockfiles
+package-lock.json
+yarn.lock
+
+# os files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+
+# testing / coverage
+coverage/
+.nyc_output/
+
+# vite cache
+.vite/
+**/.vite/
+
+# postman collection (kept local-only)
+Feature-Flag-Platform.postman_collection.json
+*.postman_collection.json
+
+# misc
+*.tgz
+.cache/
