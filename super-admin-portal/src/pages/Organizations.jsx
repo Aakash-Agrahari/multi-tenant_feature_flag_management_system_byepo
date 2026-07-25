@@ -77,7 +77,7 @@ const Organizations = () => {
       </div>
 
       {showModal && (
-        <CreateOrgModal onClose={() => setShowModal(false)} onCreated={(org) => setOrgs((prev) => [{ ...org, userCount: 0, flagCount: 0 }, ...prev])} />
+        <CreateOrgModal onClose={() => setShowModal(false)} onCreated={(org) => setOrgs((prev) => [{ ...org, userCount: 1, flagCount: 0 }, ...prev])} />
       )}
       {selectedOrg && <OrgStatsDrawer org={selectedOrg} onClose={() => setSelectedOrg(null)} />}
     </div>
